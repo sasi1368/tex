@@ -1,46 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login with Phone</title>
 </head>
 <body>
-  <h2>Login</h2>
-  <input type="text" id="phone" placeholder="Phone Number" />
-  <button onclick="sendCode()">Send Code</button>
 
-  <div id="verify">
-    <input type="text" id="code" placeholder="Enter Code" />
-    <button onclick="verifyCode()">Verify</button>
-  </div>
+  <h1>Login with Phone Number</h1>
+  <input type="text" id="phone-input" placeholder="Enter your phone number" />
+  <button id="send-code-btn">Send Code</button>
 
-  <script>
-    async function sendCode() {
-      const phone = document.getElementById("phone").value;
-      const res = await fetch("/send-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
-      });
-      const data = await res.json();
-      alert(data.success ? "Code sent!" : "Error sending code");
-    }
+  <br><br>
 
-    async function verifyCode() {
-      const phone = document.getElementById("phone").value;
-      const code = document.getElementById("code").value;
-      const res = await fetch("/verify-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, code }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        window.location.href = "dashboard.html";
-      } else {
-        alert("Invalid code");
-      }
-    }
-  </script>
+  <input type="text" id="code-input" placeholder="Enter verification code" />
+  <button id="verify-code-btn">Verify Code</button>
+
+  <script src="main.js"></script>
 </body>
 </html>
