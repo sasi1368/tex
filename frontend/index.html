@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login with Phone</title>
 </head>
 <body>
+  <h2>ورود با شماره تلفن</h2>
 
-  <h1>Login with Phone Number</h1>
-  <input type="text" id="phone-input" placeholder="Enter your phone number" />
-  <button id="send-code-btn">Send Code</button>
+  <div>
+    <label for="phone">شماره تلفن:</label>
+    <input type="text" id="phone" placeholder="مثلاً 09123456789" />
+    <button id="sendCodeBtn">ارسال کد</button>
+  </div>
 
-  <br><br>
-
-  <input type="text" id="code-input" placeholder="Enter verification code" />
-  <button id="verify-code-btn">Verify Code</button>
+  <div style="margin-top: 20px;">
+    <label for="code">کد تأیید:</label>
+    <input type="text" id="code" placeholder="کد ارسال‌شده" />
+    <button id="verifyCodeBtn">ورود</button>
+  </div>
 
   <script src="main.js"></script>
 </body>
