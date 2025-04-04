@@ -1,40 +1,56 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const axios = require("axios");
-const User = require("../models/User");
+const User = require('../models/User');
+const fetch = require('node-fetch');
 
-// ارسال کد
-router.post("/send-code", async (req, res) => {
+// ارسال کد تایید به شماره تلفن
+router.post('/send-code', async (req, res) => {
   const { phone } = req.body;
+
+  // تولید کد تصادفی
   const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-  try {
-    const response = await axios.post("https://textbelt.com/text", {
+  // ارسال پیامک با استفاده از Textbelt
+  const response = await fetch('https://textbelt.com/text', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
       phone,
-      message: `Your login code is: ${code}`,
-      key: process.env.TEXTBELT_API_KEY,
-    });
+      message: `Your verification code is: ${code}`,
+      key: process.env.TEXTBELT_KEY, // کلید API از متغیر محیطی
+    }),
+  });
 
-    if (response.data.success) {
-      await User.findOneAndUpdate({ phone }, { code }, { upsert: true });
-      res.json({ success: true });
-    } else {
-      res.status(400).json({ error: "SMS failed" });
-    }
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
+  if (response.ok) {
+    // ذخیره یا بروزرسانی کاربر در دیتابیس
+    let user = await User.findOneAndUpdate(
+      { phone },
+      { code },  // ذخیره کد برای تایید
+      { upsert: true, new: true }
+    );
+
+    res.json({ success: true });
+  } else {
+    res.status(400).json({ error: 'Failed to send SMS' });
   }
 });
 
-// تایید کد
-router.post("/verify-code", async (req, res) => {
+// تایید کد ارسال شده
+router.post('/verify-code', async (req, res) => {
   const { phone, code } = req.body;
-  const user = await User.findOne({ phone });
 
-  if (user && user.code === code) {
-    res.json({ success: true, user });
+  // پیدا کردن کاربر در دیتابیس
+  let user = await User.findOne({ phone });
+
+  if (!user) {
+    return res.status(400).json({ error: 'User not found' });
+  }
+
+  // بررسی صحت کد
+  if (user.code === code) {
+    res.json({ success: true });
   } else {
-    res.status(400).json({ error: "Invalid code" });
+    res.status(400).json({ error: 'Invalid code' });
   }
 });
 
