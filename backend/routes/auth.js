@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const User = require('../models/User'); // مدل User را وارد می‌کنیم
-require('dotenv').config();
+
+// وارد کردن مستقیم کلید API Textbelt
+const TEXTBELT_KEY = 'textbelt'; // کلید API خود را اینجا وارد کنید
 
 // ارسال کد تاییدیه از طریق Textbelt
 router.post('/send-code', async (req, res) => {
@@ -14,12 +16,17 @@ router.post('/send-code', async (req, res) => {
   }
 
   try {
+    console.log("📲 شماره وارد شده:", phoneNumber);
+
     // ارسال درخواست به API Textbelt
     const response = await axios.post('https://textbelt.com/text', {
       phone: phoneNumber,
       message: 'Your verification code is: 123456', // کد تاییدیه
-      key: process.env.TEXTBELT_KEY
+      key: TEXTBELT_KEY // استفاده از کلید API وارد شده
     });
+
+    // چاپ لاگ برای بررسی پاسخ از Textbelt
+    console.log("🚀 ارسال درخواست به Textbelt:", response.data);
 
     if (response.data.success) {
       console.log(`📲 کد تایید به شماره ${phoneNumber} ارسال شد`);
