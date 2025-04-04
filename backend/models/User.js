@@ -1,8 +1,21 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  phone: { type: String, required: true, unique: true },
-  code: { type: String },  // ذخیره کد تایید
+  phoneNumber: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  verificationCode: {
+    type: String,
+    required: true,
+  },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-module.exports = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;
