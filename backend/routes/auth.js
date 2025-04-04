@@ -1,37 +1,46 @@
 const express = require('express');
 const router = express.Router();
-const fetch = require('node-fetch'); // باید نصب شده باشه: npm install node-fetch
+const fetch = require('node-fetch'); // مطمئن شو نصب شده
 const User = require('../models/User');
 
-// ارسال کد تأیید
+const generatedCodes = {}; // حافظه موقت
+
 router.post('/send-code', async (req, res) => {
   const { phone } = req.body;
-  const verificationCode = Math.floor(100000 + Math.random() * 900000);
+  if (!phone) {
+    return res.status(400).json({ success: false, error: 'شماره وارد نشده' });
+  }
 
-  // ذخیره یا بروزرسانی کد در دیتابیس
-  await User.findOneAndUpdate(
-    { phone },
-    { phone, code: verificationCode },
-    { upsert: true, new: true }
-  );
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  generatedCodes[phone] = code;
 
-  // ارسال پیامک با Textbelt
-  const smsResponse = await fetch('https://textbelt.com/text', {
+  const textbeltRes = await fetch('https://textbelt.com/text', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       phone: phone,
-      message: `Your verification code is: ${verificationCode}`,
-      key: 'textbelt',
-    }),
+      message: `کد ورود شما: ${code}`,
+      key: 'textbelt' // از نسخه رایگان استفاده می‌کنیم
+    })
   });
 
-  const result = await smsResponse.json();
+  const data = await textbeltRes.json();
+  console.log('Textbelt response:', data);
 
-  if (result.success) {
-    res.json({ success: true, message: 'Code sent!' });
+  if (data.success) {
+    res.json({ success: true });
   } else {
-    res.status(400).json({ success: false, error: result.error || 'Failed to send SMS' });
+    res.status(500).json({ success: false, error: data.error || 'ارسال پیامک ناموفق بود' });
+  }
+});
+
+router.post('/verify-code', (req, res) => {
+  const { phone, code } = req.body;
+  if (generatedCodes[phone] && generatedCodes[phone] === code) {
+    delete generatedCodes[phone];
+    res.json({ success: true });
+  } else {
+    res.status(400).json({ success: false, error: 'کد اشتباه است' });
   }
 });
 
