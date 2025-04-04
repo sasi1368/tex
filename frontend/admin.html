@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><title>Admin</title></head>
+<body>
+  <h2>All Users</h2>
+  <ul id="users"></ul>
+
+  <script>
+    fetch("https://your-backend-url.onrender.com/api/admin/users")
+      .then(res => res.json())
+      .then(users => {
+        const ul = document.getElementById("users");
+        users.forEach(u => {
+          const li = document.createElement("li");
+          li.innerText = `${u.phone} - joined ${new Date(u.createdAt).toLocaleString()}`;
+          ul.appendChild(li);
+        });
+      });
+  </script>
+</body>
+</html>

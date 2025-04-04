@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head><title>Dashboard</title></head>
+<body>
+  <h2>Welcome!</h2>
+  <p>Your phone: <span id="userPhone"></span></p>
+  <script>
+    document.getElementById("userPhone").innerText = localStorage.getItem("userPhone");
+  </script>
+</body>
+</html>
