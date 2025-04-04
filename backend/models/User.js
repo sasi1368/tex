@@ -1,9 +1,8 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  phone: { type: String, unique: true },
-  code: String,
-  createdAt: { type: Date, default: Date.now }
+  phone: { type: String, required: true, unique: true },
+  code: { type: String },  // ذخیره کد تایید
 });
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model('User', userSchema);
