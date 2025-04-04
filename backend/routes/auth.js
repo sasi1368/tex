@@ -1,46 +1,36 @@
+// backend/routes/auth.js
 const express = require('express');
 const router = express.Router();
-const fetch = require('node-fetch'); // مطمئن شو نصب شده
-const User = require('../models/User');
+const fetch = require('node-fetch');
+const User = require('../models/User'); // بررسی وجود این فایل
 
-const generatedCodes = {}; // حافظه موقت
-
+// ارسال کد
 router.post('/send-code', async (req, res) => {
-  const { phone } = req.body;
-  if (!phone) {
-    return res.status(400).json({ success: false, error: 'شماره وارد نشده' });
-  }
+  try {
+    const { phone } = req.body;
+    console.log('📞 دریافت شماره:', phone);
 
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-  generatedCodes[phone] = code;
+    const response = await fetch('https://textbelt.com/text', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone: phone,
+        message: 'کد تایید شما: 123456',
+        key: 'textbelt', // رایگان
+      }),
+    });
 
-  const textbeltRes = await fetch('https://textbelt.com/text', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      phone: phone,
-      message: `کد ورود شما: ${code}`,
-      key: 'textbelt' // از نسخه رایگان استفاده می‌کنیم
-    })
-  });
+    const data = await response.json();
+    console.log('📨 پاسخ از textbelt:', data);
 
-  const data = await textbeltRes.json();
-  console.log('Textbelt response:', data);
-
-  if (data.success) {
-    res.json({ success: true });
-  } else {
-    res.status(500).json({ success: false, error: data.error || 'ارسال پیامک ناموفق بود' });
-  }
-});
-
-router.post('/verify-code', (req, res) => {
-  const { phone, code } = req.body;
-  if (generatedCodes[phone] && generatedCodes[phone] === code) {
-    delete generatedCodes[phone];
-    res.json({ success: true });
-  } else {
-    res.status(400).json({ success: false, error: 'کد اشتباه است' });
+    if (data.success) {
+      res.json({ success: true });
+    } else {
+      res.status(400).json({ success: false, error: data.error });
+    }
+  } catch (err) {
+    console.error('❌ خطا در ارسال کد:', err);
+    res.status(500).json({ success: false, error: 'Server error' });
   }
 });
 
